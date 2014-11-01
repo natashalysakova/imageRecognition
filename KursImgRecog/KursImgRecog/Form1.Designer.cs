@@ -133,7 +133,7 @@
             this.toolStripButton10});
             this.toolStrip2.Location = new System.Drawing.Point(0, 3);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(77, 57);
+            this.toolStrip2.Size = new System.Drawing.Size(77, 103);
             this.toolStrip2.TabIndex = 0;
             // 
             // toolStripButton8
@@ -188,7 +188,6 @@
             this.toolStripButton9.Name = "toolStripButton9";
             this.toolStripButton9.Size = new System.Drawing.Size(75, 20);
             this.toolStripButton9.Text = "noise";
-            this.toolStripButton9.Visible = false;
             // 
             // additivNoiseToolStripMenuItem
             // 
@@ -216,7 +215,6 @@
             this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
             this.toolStripDropDownButton2.Size = new System.Drawing.Size(75, 20);
             this.toolStripDropDownButton2.Text = "filters";
-            this.toolStripDropDownButton2.Visible = false;
             // 
             // svertkaToolStripMenuItem
             // 
