@@ -16,7 +16,7 @@ namespace KursImgRecog
     {
         delegate void ImageChangeHandler();
 
-            event ImageChangeHandler OnImageChange;
+        event ImageChangeHandler OnImageChange;
 
         private Image _originalImage;
 
@@ -29,8 +29,11 @@ namespace KursImgRecog
         Image img;
         public Image Image
         {
-            set { img = value;
-                OnImageChange();}
+            set
+            {
+                img = value;
+                OnImageChange();
+            }
             get { return img; }
         }
 
@@ -41,34 +44,90 @@ namespace KursImgRecog
         {
             OnImageChange += CustomImage_OnImageChange;
             pb = box;
-            if(box.Image == null)
-            {
-            OriginalImage = new Bitmap(Properties.Resources.CIMG0266);
-            Image = new Bitmap(Properties.Resources.CIMG0266);
 
+            if (box.Image == null)
+            {
+                Image = new Bitmap(Properties.Resources.CIMG0266);
+                GreyScale();
+                OriginalImage = new Bitmap(Properties.Resources.CIMG0266);
             }
             else
             {
-                OriginalImage = new Bitmap(box.Image);
                 Image = new Bitmap(box.Image);
+                GreyScale();
+                OriginalImage = new Bitmap(box.Image);
             }
+
         }
+
+        int black, white;
 
         private void CustomImage_OnImageChange()
         {
             pb.Image = Image;
         }
 
-        public void RestoreImage()
+        public Bitmap RestoreImage()
         {
-            Image = OriginalImage;
-            
+            return new Bitmap(OriginalImage);
+
         }
 
-        public void Rotate(RotateFlipType type)
+        public Bitmap Rotate(RotateFlipType type)
         {
-            img.RotateFlip(type);
-            Image = img;
+            int width = img.Width;
+            int height = img.Height;
+
+            Bitmap tmp = new Bitmap(1,1);
+            switch (type)
+            {
+                case RotateFlipType.Rotate90FlipNone:
+                    tmp = new Bitmap(img.Height, img.Width);
+
+                    for (int i = 0; i < width; i++)
+                    {
+                        for (int j = 0; j < height; j++)
+                        {
+                            Color old = ((Bitmap)img).GetPixel(i, j);
+                            tmp.SetPixel(height - 1 - j, i, old);
+                        }
+                    }
+
+                    break;
+                case RotateFlipType.Rotate270FlipNone:
+                    tmp = new Bitmap(img.Height, img.Width);
+
+                    for (int i = 0; i < width; i++)
+                    {
+                        for (int j = 0; j < height; j++)
+                        {
+                            Color old = ((Bitmap)img).GetPixel(i, j);
+
+                            tmp.SetPixel(j, width - 1 - i, old);
+                        }
+                    }
+
+                    break;
+                case RotateFlipType.Rotate180FlipNone:
+                    tmp = new Bitmap(img.Width, img.Height);
+
+                    for (int i = 0; i < width; i++)
+                    {
+                        for (int j = 0; j < height; j++)
+                        {
+                            Color old = ((Bitmap)img).GetPixel(i, j);
+
+                            tmp.SetPixel(width-1-i, height-1-j, old);
+                        }
+                    }
+
+                    break;
+                default:
+                    tmp = new Bitmap(OriginalImage);
+
+                    break;
+            }
+            return tmp;
         }
 
         internal int GetPixelsCount()
@@ -80,8 +139,6 @@ namespace KursImgRecog
         {
             unsafe
             {
-                Stopwatch s = new Stopwatch();
-                s.Start();
                 LockBitmap bmp = new LockBitmap(new Bitmap(Image));
                 bmp.LockBits();
                 for (int x = 0; x < Image.Width; x++)
@@ -98,14 +155,12 @@ namespace KursImgRecog
 
                 bmp.UnlockBits();
                 Image = bmp.GetImage();
-                s.Stop();
-                Console.WriteLine(s.Elapsed);
             }
         }
 
-      
 
-        public void AdiitiveNoise(int SKO)
+
+        public Bitmap AdiitiveNoise(int SKO)
         {
             Bitmap bmp = new Bitmap(Image);
 
@@ -125,10 +180,20 @@ namespace KursImgRecog
                     b = (b > 255 ? 255 : b);
                     bmp.SetPixel(i, j, Color.FromArgb(r, g, b));
                 }
-            Image = bmp;
+            return bmp;
         }
 
-        internal void ImpulseNoise(int count, int brightness)
+        internal int GetWhite()
+        {
+            return white;
+        }
+
+        internal int GetBlack()
+        {
+            return black;
+        }
+
+        internal Bitmap ImpulseNoise(int count, int brightness)
         {
             var r = new Random();
             var bitmap = new Bitmap(Image);
@@ -138,7 +203,7 @@ namespace KursImgRecog
                 bitmap.SetPixel(r.Next() % bitmap.Width, r.Next() % bitmap.Height, Color.FromArgb(brightness, brightness, brightness));
             }
 
-            Image = bitmap;
+            return bitmap;
         }
 
         private int GetMaskSumm(int[,] mask)
@@ -155,7 +220,7 @@ namespace KursImgRecog
             return summ;
         }
 
-        internal void SvertkawithMask()
+        internal Bitmap SvertkawithMask()
         {
             var bitmap = new Bitmap(Image);
             int[,] mask =
@@ -189,10 +254,10 @@ namespace KursImgRecog
                 }
             }
 
-            Image = bitmap;
+            return bitmap;
         }
 
-        internal void Previtt()
+        internal Bitmap Previtt()
         {
             int[,] mask1 = new int[3, 3]
                 {
@@ -206,10 +271,10 @@ namespace KursImgRecog
                     { 0, 0, 0 },
                     { -1, -1, -1 }
                 };
-            Image = Gradient(mask1, mask2);
+            return Gradient(mask1, mask2);
         }
 
-        internal void Laplass()
+        internal Bitmap Laplass()
         {
             int[,] mask1 = new int[3, 3]
                 {
@@ -223,10 +288,10 @@ namespace KursImgRecog
                     { 1, -8, 1 },
                     { 1, 1, 1 }
                 };
-            Image = Gradient(mask1, mask2);
+            return Gradient(mask1, mask2);
         }
 
-        internal void Kirsha()
+        internal Bitmap Kirsha()
         {
             int[,] mask1 = new int[3, 3]
                 {
@@ -240,7 +305,7 @@ namespace KursImgRecog
                     { 5, 0, -3 },
                     { 5, -3, -3 }
                 };
-            Image = Gradient(mask1, mask2);
+            return Gradient(mask1, mask2);
 
         }
 
@@ -265,11 +330,11 @@ namespace KursImgRecog
                             int y = mask2[k, l];
 
                             double olbr = b.GetPixel(i - 1 + k, j - 1 + l).GetBrightness();
-                            // int br = (int)(olbr * 255);
+                            int br = (int)(olbr * 255);
 
 
-                            xgrad += x * olbr;
-                            ygrad += y * olbr;
+                            xgrad += x * br;
+                            ygrad += y * br;
                         }
                     }
 
@@ -286,13 +351,13 @@ namespace KursImgRecog
             return b;
         }
 
-        internal void VzveshennyyMedianny()
+        internal Bitmap VzveshennyyMedianny()
         {
 
             Filter f = new Filter();
             Bitmap b = new Bitmap(Image);
             f.FilterMatrix = new int[,] { { 1, 2, 1 }, { 2, 3, 2 }, { 1, 2, 1 } };
-            Image = f.W_MedianFilter(b, 3);
+            return f.W_MedianFilter(b, 3);
         }
 
 
@@ -505,7 +570,7 @@ namespace KursImgRecog
             }
 
 
-           
+
 
             public Bitmap ApplyFilter(Bitmap Input)
             {
@@ -572,61 +637,34 @@ namespace KursImgRecog
         }
 
 
-
-
-
-
-        internal void KBlizghaishyh()
+        internal Bitmap KBlizghaishyh()
         {
             Filter f = new Filter();
             Bitmap b = new Bitmap(Image);
-            Image = f.k_nearest(b, 5);
+            return f.k_nearest(b, 5);
 
         }
 
-        internal void Vodorazdel()
+        internal Bitmap Vodorazdel()
         {
             WatershedGrayscale w = new WatershedGrayscale();
-            Image = w.Apply(new Bitmap(Image));
+            return w.Apply(new Bitmap(Image));
         }
 
-        internal void Porogovaya()
+        internal Bitmap Porogovaya(int porog)
         {
             Bitmap b = new Bitmap(Image);
 
-           
+            black = white = 0;
             List<int> arr = CreateHistogramm();
 
             List<int> arr2 = new List<int>(arr);
 
             int firstpeak = arr2.IndexOf(arr2.Max());
             arr2.RemoveAt(firstpeak);
-            int secondPeak = arr.IndexOf(arr2.Max());
+            int secondPeak = arr2.IndexOf(arr2.Max());
 
             int min = 999999;
-            int porog = 0;
-            if (firstpeak > secondPeak)
-            {
-                for (int i = secondPeak; i < firstpeak; i++)
-                {
-                    if (arr[i] < min)
-                    {
-                        min = arr[i];
-                        porog = i;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = firstpeak; i < secondPeak; i++)
-                {
-                    if (arr[i] < min)
-                    {
-                        min = arr[i];
-                        porog = i;
-                    }
-                }
-            }
 
 
             for (int i = 0; i < b.Width; i++)
@@ -635,19 +673,23 @@ namespace KursImgRecog
                 {
                     double br = (int)(b.GetPixel(i, j).GetBrightness() * 255);
                     if (br > porog)
+                    {
                         b.SetPixel(i, j, Color.FromArgb(128, 220, 220, 220));
+                        black++;
+                    }
                     else
                     {
                         b.SetPixel(i, j, Color.FromArgb(128, 36, 36, 36));
+                        white++;
                     }
 
                 }
             }
 
-            Image = b;
+            return b;
         }
 
-        private List<int> CreateHistogramm()
+        public List<int> CreateHistogramm()
         {
             int summ = 0;
 
@@ -668,7 +710,7 @@ namespace KursImgRecog
             return new List<int>(arr);
         }
 
-        internal void Medianny()
+        internal Bitmap Medianny()
         {
             var bitmap = new Bitmap(Image);
             for (int i = 1; i < bitmap.Width - 1; i++)
@@ -689,7 +731,7 @@ namespace KursImgRecog
                 }
             }
 
-            Image = bitmap;
+            return bitmap;
         }
     }
 
