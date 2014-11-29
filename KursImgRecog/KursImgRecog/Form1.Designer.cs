@@ -326,7 +326,7 @@
             // chainCodingToolStripMenuItem
             // 
             this.chainCodingToolStripMenuItem.Name = "chainCodingToolStripMenuItem";
-            this.chainCodingToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.chainCodingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.chainCodingToolStripMenuItem.Text = "chain coding";
             this.chainCodingToolStripMenuItem.Click += new System.EventHandler(this.chainCodingToolStripMenuItem_Click);
             // 
@@ -445,7 +445,7 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.Filter = "Image Files (*.bmp, *.jpg)|*.bmp;*.jpg";
+            this.openFileDialog1.Filter = "Image Files (*.bmp, *.jpg, *.png)|*.bmp;*.jpg; *.png";
             this.openFileDialog1.Title = "Открыть файл";
             // 
             // saveFileDialog1

@@ -271,7 +271,8 @@ namespace KursImgRecog
 
         private void chainCodingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if(pictureBox1.Image!=null)
+                OpenWindow(image.AlgorithmBeatle());
         }
 
         private void градусовToolStripMenuItem_Click(object sender, EventArgs e)

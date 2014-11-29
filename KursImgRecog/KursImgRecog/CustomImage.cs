@@ -78,7 +78,7 @@ namespace KursImgRecog
             int width = img.Width;
             int height = img.Height;
 
-            Bitmap tmp = new Bitmap(1,1);
+            Bitmap tmp = new Bitmap(1, 1);
             switch (type)
             {
                 case RotateFlipType.Rotate90FlipNone:
@@ -117,7 +117,7 @@ namespace KursImgRecog
                         {
                             Color old = ((Bitmap)img).GetPixel(i, j);
 
-                            tmp.SetPixel(width-1-i, height-1-j, old);
+                            tmp.SetPixel(width - 1 - i, height - 1 - j, old);
                         }
                     }
 
@@ -155,6 +155,29 @@ namespace KursImgRecog
 
                 bmp.UnlockBits();
                 Image = bmp.GetImage();
+            }
+        }
+
+        public Bitmap GreyScale(Image b)
+        {
+            unsafe
+            {
+                LockBitmap bmp = new LockBitmap(new Bitmap(b));
+                bmp.LockBits();
+                for (int x = 0; x < Image.Width; x++)
+                {
+                    for (int y = 0; y < Image.Height; y++)
+                    {
+                        Color c = bmp.GetPixel(x, y);
+                        int g = (int)(0.222 * c.R + 0.707 * c.G + 0.071 * c.B);
+                        Color newColor = Color.FromArgb(g, g, g);
+                        bmp.SetPixel(x, y, newColor);
+
+                    }
+                }
+
+                bmp.UnlockBits();
+                return new Bitmap(bmp.GetImage());
             }
         }
 
@@ -361,279 +384,361 @@ namespace KursImgRecog
         }
 
 
-        public class Filter
+        enum Direction
         {
-            /// <summary>
-            /// Инициализация
-            /// </summary>
-            public Filter()
-            {
-                _FilterMatrix = new int[3, 3];
-            }
-            /// <summary>
-            /// Инициализация
-            /// </summary>
-            /// <param name="Width">Ширина        /// <param name="Height">Высота        
-            public Filter(int Width, int Height)
-            {
-                _FilterMatrix = new int[Width, Height];
-                this.Width = Width;
-                this.Height = Height;
-            }
-            private int[,] _FilterMatrix = null;
-            private int _Width = 3;
-            private int _Height = 3;
-            private int _Offset = 0;
-            /// <summary>
-            /// Текущая матрица
-            /// </summary>
-            public int[,] FilterMatrix
-            {
-                get { return _FilterMatrix; }
-                set { _FilterMatrix = value; }
-            }
-            /// <summary>
-            /// Ширина матрицы
-            /// </summary>
-            public int Width
-            {
-                get { return _Width; }
-                set { _Width = value; }
-            }
-            /// <summary>
-            /// Высота матрицы
-            /// </summary>
-            public int Height
-            {
-                get { return _Height; }
-                set { _Height = value; }
-            }
-            /// <summary>
-            /// Сдвиг цветовых значений
-            /// </summary>
-            public int Offset
-            {
-                get { return _Offset; }
-                set { _Offset = value; }
-            }
-            /// <summary>
-            /// Возвращает изображение с применением фильтра
-            /// </summary>
-            ///<param name="Input">Исходное изображение       
+            North, West, East, South
+        }
 
 
-            static public void Quicksort(List<Color> ar)
-            {
-                if (ar.Count > 1) Quicksort(ar, 0, ar.Count - 1);
-            }
 
-            static private void Quicksort(List<Color> ar, int left, int right)
-            {
-                if (left == right) return;
-                int i = left + 1;
-                int j = right;
-                Color pivot = ar[left];
+        public Bitmap AlgorithmBeatle()
+        {
 
-                // Loop invariant i <= j
-                while (i < j)
+            GreyScale();
+
+            //Bitmap neweBitmap = new Bitmap(Image.Width, Image.Height);
+            //Bitmap old = new Bitmap(Image);
+            //int X = 0, Y = 0; // Координаты первой встречи с объектом
+            //int cX, cY; // Текущие координаты маркера
+            //Color B; // Значение текущего пиксела
+            //Direction Direct; // Направление движения жука
+            //// Идем до тех пор, пока не встретим черную область
+            //for (Y = 1; Y < old.Height; Y++)
+            //{
+            //    for (X = 1; X < old.Width; X++)
+            //    {
+            //        B = old.GetPixel(X, Y);
+            //        if (B != Color.White)
+            //            break;
+            //    }
+            //    // Если встречен объект, отличающийся от цвета фона (255 - белый)
+            //    // прервать поиск
+            //    if (X != old.Width)
+            //        break;
+            //}
+            //// Если не нашли ни одного черного пиксела, то выходим из процедуры
+            //if ((X == old.Width) && (Y == old.Height))
+            //    return null;
+            //// Если все нормально, начинаем обход по алгоритму жука
+            //neweBitmap.SetPixel(X, Y, Color.Black);
+            //// Поворачиваем налево (новое направление - север)
+            //cX = X;
+            //cY = Y - 1;
+            //Direct = Direction.North;
+            //// Пока не придем в исходную точку, выделяем контур объекта
+            //while ((cX != X) || (cY != Y))
+            //{
+            //    // В зависимости от текущего направления движения жука
+            //    switch (Direct)
+            //    {
+            //        // Север
+            //        case Direction.North:
+            //            {
+            //                B = old.GetPixel(cX, cY);
+            //                // Если элемент "черный", поворачиваем снова "налево"
+            //                if (B != Color.White)
+            //                {
+            //                    neweBitmap.SetPixel(cX, cY, Color.Black);
+            //                    Direct = Direction.West;
+            //                    cX--;
+            //                }
+            //                // Иначе поворачиваем "направо"
+            //                else
+            //                {
+            //                    Direct = Direction.East;
+            //                    cX++;
+            //                }
+            //            }
+            //            break;
+            //        // Восток
+            //        case Direction.East:
+            //            {
+            //                B = old.GetPixel(cX, cY);
+            //                // Если элемент "черный", поворачиваем снова "налево"
+            //                if (B != Color.White)
+            //                {
+            //                    neweBitmap.SetPixel(cX, cY, Color.Black);
+            //                    Direct = Direction.North;
+            //                    cY--;
+            //                }
+            //                 // Иначе поворачиваем "направо"
+            //                else
+            //                {
+            //                    Direct = Direction.South;
+            //                    cY++;
+            //                }
+            //            }
+            //            break;
+            //        // Юг
+            //        case Direction.South:
+            //            {
+            //                B = old.GetPixel(cX, cY);
+            //                // Если элемент "черный", поворачиваем снова "налево"
+            //                if (B != Color.White)
+            //                {
+            //                    neweBitmap.SetPixel(cX, cY, Color.Black);
+            //                    Direct = Direction.East;
+            //                    cX++;
+            //                }
+            //                    // Иначе поворачиваем "направо"
+            //                else
+            //                {
+            //                    Direct = Direction.West;
+            //                    cX--;
+            //                }
+            //            }
+            //            break;
+            //        // Запад
+            //        case Direction.West:
+            //            {
+            //                B = old.GetPixel(cX, cY);
+            //                // Если элемент "черный", поворачиваем снова "налево"
+            //                if (B != Color.White)
+            //                {
+            //                    neweBitmap.SetPixel(cX, cY, Color.Black);
+            //                    Direct = Direction.South;
+            //                    cY++;
+            //                }
+            //                    // Иначе поворачиваем "направо"
+            //                else
+            //                {
+            //                    Direct = Direction.North;
+            //                    cY--;
+            //                }
+            //            }
+            //            break;
+            //    }
+            //}
+            //return neweBitmap;
+
+
+
+            ////start pixel for bug
+            //Bitmap workBmp = new Bitmap(Image);
+            ////default direction
+            //Direction direction = Direction.North;
+            //int currentX = 0;
+            //int currentY = 0;
+            //for (int i = 0; i < workBmp.Height; i++)
+            //{
+            //    for (int j = 0; j < workBmp.Width; j++)
+            //    {
+            //        //founding first black pixel
+            //        Color tmp = workBmp.GetPixel(j, i);
+            //        if (NearBlack(tmp))
+            //        {
+            //            if ((j != 0) && (i != 0))
+            //            {
+            //                currentX = j;//end X coordinate
+            //                currentY = i - 1;//end Y coordinate
+            //            }
+
+            //            direction = Direction.North;
+
+            //            while ((currentX != j) || (currentY != i))
+            //            {
+            //                switch (direction)
+            //                {
+            //                    case Direction.North:
+            //                        {
+            //                            if (NearBlack(workBmp.GetPixel(currentX, currentY)))
+            //                            {
+            //                                direction = Direction.West;
+            //                                currentX--;
+            //                                workBmp.SetPixel(currentX, currentY, Color.Tomato);
+            //                            }
+            //                            else
+            //                            {
+            //                                direction = Direction.East;
+            //                                currentX++;
+            //                            }
+            //                            break;
+            //                        }
+            //                    case Direction.East:
+            //                        {
+            //                            if (NearBlack(workBmp.GetPixel(currentX, currentY)))
+            //                            {
+            //                                direction = Direction.North;
+            //                                currentY--;
+            //                                workBmp.SetPixel(currentX, currentY, Color.Tomato);
+            //                            }
+            //                            else
+            //                            {
+            //                                direction = Direction.South;
+            //                                currentY++;
+            //                            }
+            //                            break;
+            //                        }
+            //                    case Direction.South:
+            //                        {
+            //                            if (NearBlack(workBmp.GetPixel(currentX, currentY)))
+            //                            {
+            //                                direction = Direction.East;
+            //                                currentX++;
+            //                                workBmp.SetPixel(currentX, currentY, Color.Tomato);
+            //                            }
+            //                            else
+            //                            {
+            //                                direction = Direction.West;
+            //                                currentX--;
+            //                            }
+            //                            break;
+            //                        }
+            //                    case Direction.West:
+            //                        {
+
+            //                            if (NearBlack(workBmp.GetPixel(currentX, currentY)))
+            //                            {
+            //                                direction = Direction.South;
+            //                                currentY++;
+            //                                workBmp.SetPixel(currentX, currentY, Color.Tomato);
+            //                            }
+            //                            else
+            //                            {
+            //                                direction = Direction.North;
+            //                                currentY--;
+            //                            }
+            //                            break;
+            //                        }
+
+            //                }
+            //            }
+
+            //        }
+            //    }
+            //}
+            //return workBmp;
+
+
+            Bitmap tmp = new Bitmap(Image);
+
+            
+
+            for (int i = 0; i < tmp.Width; i++)
+            {
+                for (int j = 0; j < tmp.Height; j++)
                 {
-                    if (ar[i].GetBrightness() <= pivot.GetBrightness()) i++;
-                    else if (ar[j].GetBrightness() > pivot.GetBrightness()) j--;
-                    else
-                    { // Swap ith and jth elements
-                        Color m = ar[i]; ar[i] = ar[j]; ar[j] = m;
-                    }
-                }
-                // Now i == j
+                    Console.WriteLine("{0}, {1}", i, j);
 
-                if (ar[j].GetBrightness() <= pivot.GetBrightness() /* it also means that i == right, because j was never moved */)
-                {
-                    // Left most element is array's maximum
-                    Color m = ar[left]; ar[left] = ar[right]; ar[right] = m;
-                    Quicksort(ar, left, right - 1);
-                }
-                else
-                {
-                    Quicksort(ar, left, i - 1);
-                    Quicksort(ar, i, right);
-                }
-            }
-
-            public int Finder(List<Color> a, Color b)
-            {
-                for (int i = 0; i < a.Count; i++)
-                {
-                    if (a[i].GetBrightness() == b.GetBrightness())
-                        return i;
-                }
-                return 0;
-            }
-
-            public Bitmap k_nearest(Bitmap Image, int Size)
-            {
-                System.Drawing.Bitmap TempBitmap = Image;
-                System.Drawing.Bitmap NewBitmap = new System.Drawing.Bitmap(TempBitmap.Width, TempBitmap.Height);
-                System.Drawing.Graphics NewGraphics = System.Drawing.Graphics.FromImage(NewBitmap);
-                NewGraphics.DrawImage(TempBitmap, new System.Drawing.Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), new System.Drawing.Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), System.Drawing.GraphicsUnit.Pixel);
-                NewGraphics.Dispose();
-                Random TempRandom = new Random();
-                int ApetureMin = -(Size / 2);
-                int ApetureMax = (Size / 2);
-                for (int x = 1; x < NewBitmap.Width - 1; ++x)
-                {
-                    for (int y = 1; y < NewBitmap.Height - 1; ++y)
+                    Color tmpColor = tmp.GetPixel(i, j);
+                    if (NearBlack(tmpColor))
                     {
-                        List<Color> clr = new List<Color>();
-                        for (int x2 = -1; x2 < 2; ++x2)
+                        Point startPoint = new Point(i, j);
+                        Direction direction = Direction.North;
+
+                        if (i == 0)
                         {
-                            int TempX = x + x2;
-                            if (TempX >= 0 && TempX < NewBitmap.Width)
+                            direction = Direction.East;
+                        }
+
+                        int currentX = i, currentY = j;
+                        if (j > 0)
+                            currentY = j - 1;
+
+                        int c = 0;
+                        do
+                        {
+                            c++;
+                            if (currentX < 0)
                             {
-                                for (int y2 = -1; y2 < 2; ++y2)
+                                currentX = 0;
+                                direction = Direction.North;
+                            }
+                            if (currentX >= tmp.Width)
+                            {
+                                currentX = tmp.Width - 1;
+                                direction = Direction.South;
+                            }
+                            if (currentY < 0)
+                            {
+                                currentY = 0;
+                                direction = Direction.East;
+                            }
+                            if (currentY >= tmp.Height)
+                            {
+                                currentY = tmp.Height - 1;
+                                direction = Direction.West;
+                            }
+
+                            Color t = tmp.GetPixel(currentX, currentY);
+
+                            if (NearBlack(t))
+                            {
+                                tmp.SetPixel(currentX, currentY, Color.Red);
+                                switch (direction)
                                 {
-                                    int TempY = y + y2;
-                                    if (TempY >= 0 && TempY < NewBitmap.Height)
-                                    {
-                                        Color TempColor = TempBitmap.GetPixel(TempX, TempY);
-                                        clr.Add(TempColor);
-                                    }
+                                    case Direction.North:
+                                        direction = Direction.West;
+                                        currentX--;
+                                        break;
+                                    case Direction.West:
+                                        direction = Direction.South;
+                                        currentY++;
+                                        break;
+                                    case Direction.East:
+                                        direction = Direction.North;
+                                        currentX++;
+                                        break;
+                                    case Direction.South:
+                                        direction = Direction.East;
+                                        currentY--;
+                                        break;
+                                }
+
+                            }
+                            else
+                            {
+                                switch (direction)
+                                {
+                                    case Direction.North:
+                                        direction = Direction.East;
+                                        currentY--;
+                                        break;
+                                    case Direction.West:
+                                        direction = Direction.North;
+                                        currentX++;
+                                        break;
+                                    case Direction.East:
+                                        direction = Direction.South;
+                                        break;
+                                    case Direction.South:
+                                        direction = Direction.West;
+                                        break;
                                 }
                             }
-                        }
 
-                        Quicksort(clr);
-                        int R = TempBitmap.GetPixel(x, y).R;
-                        int G = TempBitmap.GetPixel(x, y).G;
-                        int B = TempBitmap.GetPixel(x, y).B;
 
-                        int rI = Finder(clr, TempBitmap.GetPixel(x, y));
-                        if (rI > 1 && rI < clr.Count - 2)
-                        {
-                            R = (clr[rI - 2].R + clr[rI - 1].R + clr[rI + 1].R + clr[rI + 2].R) / 4;
-                            G = (clr[rI - 2].G + clr[rI - 1].G + clr[rI + 1].G + clr[rI + 2].G) / 4;
-                            B = (clr[rI - 2].B + clr[rI - 1].B + clr[rI + 1].B + clr[rI + 2].B) / 4;
-                        }
 
-                        if (rI == clr.Count - 1)
-                        {
-                            R = (clr[rI - 1].R + clr[rI - 2].R + clr[rI - 3].R + clr[rI - 4].R) / 4;
-                            G = (clr[rI - 1].G + clr[rI - 2].G + clr[rI - 3].G + clr[rI - 4].G) / 4;
-                            B = (clr[rI - 1].B + clr[rI - 2].B + clr[rI - 3].B + clr[rI - 4].B) / 4;
-                        }
-
-                        Color MedianPixel = Color.FromArgb(R, G, B);
-                        NewBitmap.SetPixel(x, y, MedianPixel);
+                        } while (/*!NearStartPoint(currentX, currentY, startPoint)*/c<1000);
 
                     }
                 }
-                return NewBitmap;
             }
 
 
-            public Bitmap W_MedianFilter(Bitmap Image, int Size)
+            return tmp;
+
+        }
+
+        private bool NearStartPoint(int currentX, int currentY, Point start)
+        {
+            int valX = Math.Abs(start.X - currentX);
+            int valY = Math.Abs(start.Y - currentY);
+            //Console.WriteLine("{0}", valX+valY);
+
+            if (valX + valY == 1)
             {
-                System.Drawing.Bitmap TempBitmap = Image;
-                System.Drawing.Bitmap NewBitmap = new System.Drawing.Bitmap(TempBitmap.Width, TempBitmap.Height);
-                System.Drawing.Graphics NewGraphics = System.Drawing.Graphics.FromImage(NewBitmap);
-                NewGraphics.DrawImage(TempBitmap, new System.Drawing.Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), new System.Drawing.Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), System.Drawing.GraphicsUnit.Pixel);
-                NewGraphics.Dispose();
-                Random TempRandom = new Random();
-                int ApetureMin = -(Size / 2);
-                int ApetureMax = (Size / 2);
-                for (int x = 0; x < NewBitmap.Width; ++x)
-                {
-                    for (int y = 0; y < NewBitmap.Height; ++y)
-                    {
-                        List<Color> clr = new List<Color>();
-                        for (int x2 = -1; x2 < 2; ++x2)
-                        {
-                            int TempX = x + x2;
-                            if (TempX >= 0 && TempX < NewBitmap.Width)
-                            {
-                                for (int y2 = -1; y2 < 2; ++y2)
-                                {
-                                    int TempY = y + y2;
-                                    if (TempY >= 0 && TempY < NewBitmap.Height)
-                                    {
-                                        Color TempColor = TempBitmap.GetPixel(TempX, TempY);
-                                        for (int l = 0; l < FilterMatrix[x2 + 1, y2 + 1]; l++) clr.Add(TempColor);
-                                    }
-                                }
-                            }
-                        }
-
-                        Quicksort(clr);
-                        NewBitmap.SetPixel(x, y, clr[(clr.Count - 1) / 2]);
-                    }
-                }
-                return NewBitmap;
+                return true;
             }
+            return false;
 
+        }
 
-
-
-            public Bitmap ApplyFilter(Bitmap Input)
-            {
-                Bitmap TempBitmap = Input;
-                Bitmap NewBitmap = new Bitmap(TempBitmap.Width, TempBitmap.Height);
-                Graphics NewGraphics = Graphics.FromImage(NewBitmap);
-                NewGraphics.DrawImage(TempBitmap, new Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), new Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), GraphicsUnit.Pixel);
-                NewGraphics.Dispose();
-                for (int x = 0; x < Input.Width; ++x)
-                {
-                    for (int y = 0; y < Input.Height; ++y)
-                    {
-                        int RValue = 0;
-                        int GValue = 0;
-                        int BValue = 0;
-                        int Weight = 0;
-                        int XCurrent = -Width / 2;
-                        for (int x2 = 0; x2 < Width; ++x2)
-                        {
-                            if (XCurrent + x < Input.Width && XCurrent + x >= 0)
-                            {
-                                int YCurrent = -Height / 2;
-                                for (int y2 = 0; y2 < Height; ++y2)
-                                {
-                                    if (YCurrent + y < Input.Height && YCurrent + y >= 0)
-                                    {
-                                        RValue += FilterMatrix[x2, y2] * TempBitmap.GetPixel(XCurrent + x, YCurrent + y).R;
-                                        GValue += FilterMatrix[x2, y2] * TempBitmap.GetPixel(XCurrent + x, YCurrent + y).G;
-                                        BValue += FilterMatrix[x2, y2] * TempBitmap.GetPixel(XCurrent + x, YCurrent + y).B;
-                                        Weight += FilterMatrix[x2, y2];
-                                    }
-                                    ++YCurrent;
-                                }
-                            }
-                            ++XCurrent;
-                        }
-                        Color MeanPixel = TempBitmap.GetPixel(x, y);
-                        if (Weight == 0)
-                            Weight = 1;
-                        if (Weight > 0)
-                        {
-                            RValue = (RValue / Weight) + Offset;
-                            if (RValue < 0)
-                                RValue = 0;
-                            else if (RValue > 255)
-                                RValue = 255;
-                            GValue = (GValue / Weight) + Offset;
-                            if (GValue < 0)
-                                GValue = 0;
-                            else if (GValue > 255)
-                                GValue = 255;
-                            BValue = (BValue / Weight) + Offset;
-                            if (BValue < 0)
-                                BValue = 0;
-                            else if (BValue > 255)
-                                BValue = 255;
-                            MeanPixel = Color.FromArgb(RValue, GValue, BValue);
-                        }
-                        NewBitmap.SetPixel(x, y, MeanPixel);
-                    }
-                }
-                return NewBitmap;
-            }
+        private bool NearBlack(Color tmp)
+        {
+            if (tmp.R < 10)
+                return true;
+            return false;
         }
 
 
@@ -735,165 +840,4 @@ namespace KursImgRecog
         }
     }
 
-    public class LockBitmap
-    {
-        Bitmap source = null;
-        IntPtr Iptr = IntPtr.Zero;
-        BitmapData bitmapData = null;
-
-        public byte[] Pixels { get; set; }
-        public int Depth { get; private set; }
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-
-        public LockBitmap(Bitmap source)
-        {
-            this.source = source;
-        }
-
-        /// <summary>
-        /// Lock bitmap data
-        /// </summary>
-        public void LockBits()
-        {
-            try
-            {
-                // Get width and height of bitmap
-                Width = source.Width;
-                Height = source.Height;
-
-                // get total locked pixels count
-                int PixelCount = Width * Height;
-
-                // Create rectangle to lock
-                Rectangle rect = new Rectangle(0, 0, Width, Height);
-
-                // get source bitmap pixel format size
-                Depth = System.Drawing.Bitmap.GetPixelFormatSize(source.PixelFormat);
-
-                // Check if bpp (Bits Per Pixel) is 8, 24, or 32
-                if (Depth != 8 && Depth != 24 && Depth != 32)
-                {
-                    throw new ArgumentException("Only 8, 24 and 32 bpp images are supported.");
-                }
-
-                // Lock bitmap and return bitmap data
-                bitmapData = source.LockBits(rect, ImageLockMode.ReadWrite,
-                                             source.PixelFormat);
-
-                // create byte array to copy pixel values
-                int step = Depth / 8;
-                Pixels = new byte[PixelCount * step];
-                Iptr = bitmapData.Scan0;
-
-                // Copy data from pointer to array
-                Marshal.Copy(Iptr, Pixels, 0, Pixels.Length);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        /// <summary>
-        /// Unlock bitmap data
-        /// </summary>
-        public void UnlockBits()
-        {
-            try
-            {
-                // Copy data from byte array to pointer
-                Marshal.Copy(Pixels, 0, Iptr, Pixels.Length);
-
-                // Unlock bitmap data
-                source.UnlockBits(bitmapData);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        /// <summary>
-        /// Get the color of the specified pixel
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public Color GetPixel(int x, int y)
-        {
-            Color clr = Color.Empty;
-
-            // Get color components count
-            int cCount = Depth / 8;
-
-            // Get start index of the specified pixel
-            int i = ((y * Width) + x) * cCount;
-
-            if (i > Pixels.Length - cCount)
-                throw new IndexOutOfRangeException();
-
-            if (Depth == 32) // For 32 bpp get Red, Green, Blue and Alpha
-            {
-                byte b = Pixels[i];
-                byte g = Pixels[i + 1];
-                byte r = Pixels[i + 2];
-                byte a = Pixels[i + 3]; // a
-                clr = Color.FromArgb(a, r, g, b);
-            }
-            if (Depth == 24) // For 24 bpp get Red, Green and Blue
-            {
-                byte b = Pixels[i];
-                byte g = Pixels[i + 1];
-                byte r = Pixels[i + 2];
-                clr = Color.FromArgb(r, g, b);
-            }
-            if (Depth == 8)
-            // For 8 bpp get color value (Red, Green and Blue values are the same)
-            {
-                byte c = Pixels[i];
-                clr = Color.FromArgb(c, c, c);
-            }
-            return clr;
-        }
-
-        /// <summary>
-        /// Set the color of the specified pixel
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="color"></param>
-        public void SetPixel(int x, int y, Color color)
-        {
-            // Get color components count
-            int cCount = Depth / 8;
-
-            // Get start index of the specified pixel
-            int i = ((y * Width) + x) * cCount;
-
-            if (Depth == 32) // For 32 bpp set Red, Green, Blue and Alpha
-            {
-                Pixels[i] = color.B;
-                Pixels[i + 1] = color.G;
-                Pixels[i + 2] = color.R;
-                Pixels[i + 3] = color.A;
-            }
-            if (Depth == 24) // For 24 bpp set Red, Green and Blue
-            {
-                Pixels[i] = color.B;
-                Pixels[i + 1] = color.G;
-                Pixels[i + 2] = color.R;
-            }
-            if (Depth == 8)
-            // For 8 bpp set color value (Red, Green and Blue values are the same)
-            {
-                Pixels[i] = color.B;
-            }
-        }
-
-        internal Image GetImage()
-        {
-            return source;
-        }
-    }
 }
